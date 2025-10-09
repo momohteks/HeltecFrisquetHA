@@ -1,7 +1,7 @@
 #include "mqtt.h"
 #include "conf.h"
 
-#include "config_portal.h"
+#include "Portal.h"
 
 Config cfg;
 
