@@ -1,10 +1,6 @@
 # Heltec Frisquet — ESP32 + SX1262 + MQTT + Home Assistant
 
-<<<<<<< HEAD
-> Un module **ESP32 Heltec LoRa (SX1262)** qui **écoute** et **pilote** une chaudière **Frisquet**, **publie** les infos en **MQTT**, et s’**intègre** à **Home Assistant**. Oui, tout ça. 🍵
-=======
 > Un module **ESP32 Heltec LoRa (SX1262)** qui **écoute** et **pilote** une chaudière **Frisquet**, **publie** les infos en **MQTT**, et s’**intègre** à **Home Assistant**.
->>>>>>> bbd8470 (First commit)
 
 ---
 
