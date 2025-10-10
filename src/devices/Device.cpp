@@ -200,3 +200,7 @@ ASSOCIATION_INFOS Device::associer(Radio *radio, uint8_t idAppareil) {
     radio->setNetworkId(oldNetworkId);
     return associationInfos;
 }
+
+bool Device::isReady() {
+    return this->idExpediteur != 0 && this->idAssociation != 0;
+}

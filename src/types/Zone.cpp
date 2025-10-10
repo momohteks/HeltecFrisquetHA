@@ -13,6 +13,10 @@ void Zone::fromBytes(const ZONE_TRAME* trame) {
     this->mode = MODE_ZONE(trame->mode);
     this->modeOptions = trame->modeOptions;
 
+    if(this->boostActif()) {
+        this->temperatureConfort -= BOOST_TEMPERATURE;
+    }
+
     memcpy(this->lundi, trame->lundi, sizeof(this->lundi));
     memcpy(this->mardi, trame->mardi, sizeof(this->mardi));
     memcpy(this->mercredi, trame->mercredi, sizeof(this->mercredi));
@@ -29,6 +33,10 @@ void Zone::toBytes(ZONE_TRAME* trame) {
     trame->temperatureHorsGel = this->temperatureHorsGel;
     trame->mode = this->mode;
     trame->modeOptions = this->modeOptions;
+
+    if(this->boostActif()) {
+        trame->temperatureConfort = this->temperatureConfort + BOOST_TEMPERATURE;
+    }
 
     memcpy(trame->lundi, this->lundi, sizeof(this->lundi));
     memcpy(trame->mardi, this->mardi, sizeof(this->mardi));
@@ -104,12 +112,23 @@ uint8_t Zone::getIdZone() {
     return this->idZone;
 }
 
-void Zone::enableBoost() {
+void Zone::activerBoost(Date dateActuelle) {
     this->modeOptions |= MODEOPT_BOOST;
+    this->debutBoost = dateActuelle;
 }
-void Zone::disableBoost() {
+void Zone::desactiverBoost() {
     this->modeOptions &= ~MODEOPT_BOOST;
 }
-bool Zone::isBoostEnable() {
+bool Zone::boostActif() {
     return (this->modeOptions & MODEOPT_BOOST) != 0;    
+}
+
+bool Zone::verifierBoost(Date dateActuelle) {
+    if(this->boostActif()) {
+        if((this->debutBoost.toTime() + DUREE_BOOST) <= dateActuelle.toTime()) {
+            return true;
+        }
+    }
+
+    return false;
 }

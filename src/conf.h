@@ -22,6 +22,8 @@
 #define DIO0 GPIO_NUM_14
 
 
+#define USE_CONNECT true // Activation Connect
+
 
 #define USE_ZONE_2 false // Activation Zone 2
 #define USE_ZONE_3 false // Activation Zone 3
@@ -40,6 +42,7 @@
 // Configuration ASSOCIATION ID par défaut
 #define DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID 0x00
 #define DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID 0x00
+#define DEFAULT_SATELLITE_Z1_ASSOCIATION_ID 0x00
 #define DEFAULT_NETWORK_ID {0x05, 0xDB, 0x46, 0x64}     // par défaut : {0xFF, 0xFF, 0xFF, 0xFF}
 
 #endif // CONFIG_H
