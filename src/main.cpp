@@ -13,6 +13,7 @@
 
 #include "devices/Connect.h"
 #include "devices/SondeExterieure.h"
+#include "devices/Satellite.h"
 #include "DS18B20.h"
 
 #include "types/Date.h"
@@ -34,10 +35,12 @@ bool associationMode = false;
 
 uint8_t sondeExterieureAssociationId = 0;
 uint8_t frisquetConnectAssociationId = 0;
+uint8_t satelliteZ1AssociationId = 0;
 NetworkID networkId;
 
 Connect *connect;
 SondeExterieure *sondeExterieure;
+Satellite* satelliteZ1;
 float temperatureExterieure = 0;
 
 #if USE_DS18B20
@@ -54,6 +57,7 @@ void initNvs() {
   NetworkID defaultNetworkId = DEFAULT_NETWORK_ID;
   sondeExterieureAssociationId = (DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID == 0) ? preferences.getUChar("son_id", 0) : DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID;
   frisquetConnectAssociationId = (DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID == 0) ? preferences.getUChar("con_id", 0) : DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID;
+  satelliteZ1AssociationId = (DEFAULT_SATELLITE_Z1_ASSOCIATION_ID == 0) ? preferences.getUChar("satz1_id", 0) : DEFAULT_SATELLITE_Z1_ASSOCIATION_ID;
 
   if ((preferences.getBytes("net_id", &networkId, sizeof(NetworkID)) != sizeof(NetworkID) || networkId.toInt32() == 0 || networkId.isBroadcast())
    && defaultNetworkId.toInt32() != 0) {
@@ -281,6 +285,15 @@ void onReceiveRadio() {
             }
         }
         #endif
+
+        if(satelliteZ1->isReady()) {
+          // Récéption chaudière vers Satellite (inverse possible également)
+          if (donnees[0] == ID_ZONE_1 && donnees[1] == ID_CHAUDIERE && donnees[2] == satelliteZ1AssociationId) { 
+            if(satelliteZ1->onReceive(&donnees[4], len-4)) {
+              satelliteZ1->setRollingCode(donnees[3]);
+            }
+          }
+        }
       }
       // Fin traitement
     
@@ -339,6 +352,8 @@ void setup() {
     #if USE_SONDE_EXTERIEURE
     sondeExterieure = new SondeExterieure(radio, mqtt, sondeExterieureAssociationId);
     #endif
+
+    satelliteZ1 = new Satellite(radio, mqtt, ID_ZONE_1, satelliteZ1AssociationId);
 }
 
 void loop() {
