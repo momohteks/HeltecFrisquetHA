@@ -22,6 +22,7 @@ class Device {
         uint8_t getRollingCode();
         void setRollingCode(uint8_t rollingCode);
         uint8_t incrementRollingCode();
+        bool isReady();
         
     protected:
         Device(Radio *radio, MQTT *mqtt, uint8_t idExpediteur, uint8_t idAssociation);
@@ -32,7 +33,7 @@ class Device {
         Radio *radio;
         MQTT *mqtt;
     private:
-        uint8_t idAssociation;
-        uint8_t idExpediteur;
+        uint8_t idAssociation = 0;
+        uint8_t idExpediteur = 0;
         uint8_t rollingCode = 0;
 };

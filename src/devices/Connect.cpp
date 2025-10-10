@@ -4,6 +4,10 @@ Connect::Connect(Radio *radio, MQTT *mqtt, uint8_t idAssociation) :  Device(radi
 
 
 bool Connect::envoyerZone(Zone *zone) {
+    if(! this->isReady()) {
+        return false;
+    }
+    
     if(this->zone1.getMode() == MODE_ZONE::INCONNU) { // Si aucun mode encore récupéré (initialisation)
         return false;
     }
@@ -80,6 +84,10 @@ bool Connect::envoyerZone(Zone *zone) {
 }
 
 bool Connect::recupererTemperatures() {
+    if(! this->isReady()) {
+        return false;
+    }
+
     byte requete[] = {0x01, 0x03, 0x79, 0xE0, 0x00, 0x1c};
 
     uint8_t retry = 0;
@@ -133,6 +141,10 @@ bool Connect::recupererTemperatures() {
 }
 
 bool Connect::recupererConsommationGaz() {
+    if(! this->isReady()) {
+        return false;
+    }
+
     byte requete[] = {0x01, 0x03, 0x7A, 0x18, 0x00, 0x1C};
     uint8_t retry = 0;
 
@@ -166,7 +178,11 @@ bool Connect::recupererConsommationGaz() {
     return false;
 }
 
-bool Connect::recupererDate() {
+bool Connect::recupererDate(Date* date) {
+    if(! this->isReady()) {
+        return false;
+    }
+
     byte requete[] = {0x01, 0x03, 0xa0, 0x2b, 0x00, 0x04};
     uint8_t retry = 0;
 
@@ -182,9 +198,18 @@ bool Connect::recupererDate() {
         size_t length = 0;
         err = this->waitingAnswer(ID_CHAUDIERE, donnees, &length);
         if(err != RADIOLIB_ERR_NONE) {
-            delay(500);
             continue;
         }
+
+        const byte codeReception[] = {0x81, 0x17, 0x2A};
+        if (length==59 && 
+            donnees[0] == codeReception[0] && 
+            donnees[1] == codeReception[1] && 
+            donnees[2] == codeReception[2]) {
+            *date = &donnees[7];
+            return true;
+        }
+
         return true;
 
     } while(retry++ < 5);
@@ -193,6 +218,10 @@ bool Connect::recupererDate() {
 }
 
 bool Connect::recupererVacances() {
+    if(! this->isReady()) {
+        return false;
+    }
+
     byte requete[] = {0x01, 0x17, 0xa0, 0xf0, 0x00, 0x15, 0x9c, 0x40, 0x00, 0x01, 0x02, 0x00, 0x00};
     
     uint8_t retry = 0;
@@ -220,6 +249,10 @@ bool Connect::recupererVacances() {
 }
 
 bool Connect::recupererPlanning() {
+    if(! this->isReady()) {
+        return false;
+    }
+    
     byte requete[] = {0x01, 0x03, 0xA1, 0x53, 0x00, 0x1C};
     
     uint8_t retry = 0;
@@ -273,6 +306,10 @@ Zone* Connect::getZone3() {
 // EVENTS
 
 bool Connect::onReceive(byte donnees[], size_t length) {
+    if(! this->isReady()) {
+        return false;
+    }
+
     if (length == 59) {
         if(donnees[1] == 0x17) { // Récupération zone
             DBG_PRINTLN("Récupération Zone"); 
@@ -346,4 +383,46 @@ float Connect::getTemperatureConsigneZ3() {
 
 float Connect::getTemperatureExterieure() {
     return this->temperatureExterieure;
+}
+
+bool Connect::activerBoost(Zone* zone) {
+    Date dateActuelle;
+
+    if(!zone->boostActif() && this->recupererDate(&dateActuelle)) {
+        zone->activerBoost(dateActuelle);
+        return true;
+    }
+
+    return false;
+}
+
+bool Connect::desactiverBoost(Zone* zone) {
+    if(zone->boostActif()) {
+        zone->desactiverBoost();
+        this->envoyerZone(zone);
+        return true;
+    }
+
+    return false;
+}
+
+
+void Connect::verifierBoost() {
+    if(this->zone1.boostActif() || this->zone2.boostActif() || this->zone2.boostActif()) {
+        Date dateActuelle;
+        if(this->recupererDate(&dateActuelle)) {
+            if(this->zone1.boostActif() && this->zone1.verifierBoost(dateActuelle)) {
+                this->zone1.desactiverBoost();
+                this->envoyerZone(&this->zone1);
+            }
+            if(this->zone2.boostActif() && this->zone2.verifierBoost(dateActuelle)) {
+                this->zone2.desactiverBoost();
+                this->envoyerZone(&this->zone2);
+            }
+            if(this->zone3.boostActif() && this->zone3.verifierBoost(dateActuelle)) {
+                this->zone3.desactiverBoost();
+                this->envoyerZone(&this->zone3);
+            }
+        }
+    }
 }

@@ -17,7 +17,7 @@ class Connect: public Device {
         bool envoyerZone(Zone *zone);
         bool recupererTemperatures();
         bool recupererConsommationGaz();
-        bool recupererDate();
+        bool recupererDate(Date *date);
         bool recupererVacances();
         bool recupererPlanning();
 
@@ -52,6 +52,10 @@ class Connect: public Device {
         bool envoiModeZ1();
         bool envoiModeZ2();
         bool envoiModeZ3();
+
+        void verifierBoost();
+        bool activerBoost(Zone* zone);
+        bool desactiverBoost(Zone* zone);
         
     private: 
         Zone zone1;

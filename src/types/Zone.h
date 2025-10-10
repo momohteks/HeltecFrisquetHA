@@ -3,12 +3,16 @@
 #include <heltec.h>
 #include "Temperature.h"
 #include "../trames.h"
+#include "../types/Date.h"
 
 #define MODEOPT_BOOST 0x40
 
 #define ID_ZONE_1 0x08
 #define ID_ZONE_2 0x09
 #define ID_ZONE_3 0x0a
+
+#define BOOST_TEMPERATURE 1.0f
+#define DUREE_BOOST 14400 // 4h maximum
 
 enum MODE_ZONE : uint8_t {
     INCONNU = 0x00,
@@ -31,9 +35,10 @@ class Zone {
         float getTemperatureReduit();
         float getTemperatureHorsGel();
 
-        void enableBoost();
-        void disableBoost();
-        bool isBoostEnable();
+        void activerBoost(Date dateActuelle);
+        void desactiverBoost();
+        bool boostActif();
+        bool verifierBoost(Date dateActuelle);
 
         uint8_t getIdZone();
 
@@ -70,4 +75,6 @@ class Zone {
         byte jeudi[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         byte vendredi[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
         byte samedi[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+        Date debutBoost;
 };

@@ -1,10 +1,13 @@
 #include "SondeExterieure.h"
 
 SondeExterieure::SondeExterieure(Radio *radio, MQTT *mqtt, uint8_t idAssociation) : Device(radio, mqtt, ID_SONDE_EXTERIEURE, idAssociation) {
-
 }
 
 bool SondeExterieure::envoyerTemperature(float temperature) {
+    if(! this->isReady()) {
+        return false;
+    }
+
     TEMPERATURE_EXTERIEURE_TRAME donnees;
     donnees.temperatureExterieure = temperature;
 
