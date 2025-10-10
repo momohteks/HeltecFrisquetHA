@@ -201,12 +201,12 @@ bool Connect::recupererDate(Date* date) {
             continue;
         }
 
-        const byte codeReception[] = {0x81, 0x17, 0x2A};
-        if (length==59 && 
+        const byte codeReception[] = {0x81, 0x03, 0x08};
+        if (length==11 && 
             donnees[0] == codeReception[0] && 
             donnees[1] == codeReception[1] && 
             donnees[2] == codeReception[2]) {
-            *date = &donnees[7];
+            *date = &donnees[3];
             return true;
         }
 
@@ -390,6 +390,7 @@ bool Connect::activerBoost(Zone* zone) {
 
     if(!zone->boostActif() && this->recupererDate(&dateActuelle)) {
         zone->activerBoost(dateActuelle);
+        this->envoyerZone(zone);
         return true;
     }
 
