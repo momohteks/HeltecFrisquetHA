@@ -62,6 +62,9 @@
 #define MQTT_RES_NVS "homeassistant/switch/frisquet/erasenvs/state"
 #define MQTT_RES_NVS_SET "homeassistant/switch/frisquet/erasenvs/set"
 
+#define MQTT_TEMPERATURE_EXTERIEURE "homeassistant/sensor/frisquet/tempExterieure/set"
+#define MQTT_TEMPERATURE_EXTERIEURE_SET "homeassistant/sensor/frisquet/tempExterieure/set"
+
 #define MQTT_HA_STATUS "homeassistant/status"
 
 class MQTT {

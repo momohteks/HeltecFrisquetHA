@@ -220,6 +220,12 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
     }
   }
   #endif
+
+  #if USE_SONDE_EXTERIEURE
+    if(topic == MQTT_TEMPERATURE_EXTERIEURE_SET) {
+      sondeExterieure->envoyerTemperature(message.toFloat());
+    }
+  #endif
 }
 
 void onReceiveRadio() {
