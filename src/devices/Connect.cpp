@@ -409,7 +409,7 @@ bool Connect::desactiverBoost(Zone* zone) {
 
 
 void Connect::verifierBoost() {
-    if(this->zone1.boostActif() || this->zone2.boostActif() || this->zone2.boostActif()) {
+    if(this->zone1.boostActif() || this->zone2.boostActif() || this->zone3.boostActif()) {
         Date dateActuelle;
         if(this->recupererDate(&dateActuelle)) {
             if(this->zone1.boostActif() && this->zone1.verifierBoost(dateActuelle)) {
