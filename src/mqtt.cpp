@@ -581,6 +581,10 @@ void MQTT::connectTopics() {
       this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort2/set");
     }
 
+    #if USE_SONDE_EXTERIEURE
+      this->client.subscribe("homeassistant/sensor/frisquet/tempExterieure/set");
+    #endif
+
     this->client.subscribe("homeassistant/switch/frisquet/boost1/set");
     this->client.subscribe("homeassistant/status");
   }
