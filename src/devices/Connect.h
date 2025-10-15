@@ -20,6 +20,7 @@ class Connect: public Device {
         bool recupererDate(Date *date);
         bool recupererVacances();
         bool recupererPlanning();
+        bool envoyerConsigne(uint8_t idZone, float tempAmbiante, float tempConsigne, MODE_ZONE mode, bool confort = false, bool derogation = false);
 
         Zone* getZone1();
         Zone* getZone2();
@@ -47,7 +48,7 @@ class Connect: public Device {
         float getTemperatureExterieure();
 
         // Association
-        ASSOCIATION_INFOS associer(Radio *radio);
+        static ASSOCIATION_INFOS associer(Radio *radio);
 
         bool envoiModeZ1();
         bool envoiModeZ2();

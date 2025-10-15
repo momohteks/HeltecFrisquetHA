@@ -55,3 +55,21 @@ struct TEMPERATURE_EXTERIEURE_TRAME {
     byte cmd[11] = {0x01, 0x17, 0x9c, 0x54, 0x00, 0x04, 0xa0, 0x29, 0x00, 0x01, 0x02};
     TEMPERATURE16 temperatureExterieure = 0.0f;
 };
+
+struct SATELLITE_ENVOI_CONSIGNE_TRAME {
+    uint8_t cmd[11] = { 0x01, 0x17, 0xA0, 0x29, 0x00, 0x15, 0xA0, 0x2F, 0x00, 0x04, 0x08 };
+    TEMPERATURE16 temperatureAmbiante; 
+    TEMPERATURE16 temperatureConsigne;
+    uint8_t i1 = 0x00; 
+    uint8_t mode = 0x00; // 0x01 Confort, 0x02 Reduit
+    uint8_t i2[2] = {0};
+
+    SATELLITE_ENVOI_CONSIGNE_TRAME(uint8_t idZone) {
+        if(idZone == 0x08) { // Zone 1
+            cmd[7] == 0x2F;
+        } else if(idZone == 0x09) { // Zone 2
+            cmd[7] == 0x34;
+            i1 = 0x80; // ? valeur proprre au module hydraulique ?
+        }
+    }
+};

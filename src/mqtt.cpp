@@ -282,7 +282,7 @@ void MQTT::connecterModeZ1() {
   "name": "%s",
   "state_topic": "homeassistant/select/frisquet/%s/state",
   "command_topic": "homeassistant/select/frisquet/%s/set",
-  "options": ["Auto", "Confort", "Réduit", "Hors gel"],
+  "options": ["Auto", "Confort", "Réduit", "Hors gel", "Inconnu"],
   "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
 })", id, name, id, id);
   this->client.publish(configTopic, configPayload);
@@ -300,7 +300,7 @@ void MQTT::connecterModeZ2() {
   "name": "%s",
   "state_topic": "homeassistant/select/frisquet/%s/state",
   "command_topic": "homeassistant/select/frisquet/%s/set",
-  "options": ["Auto", "Confort", "Réduit", "Hors gel"],
+  "options": ["Auto", "Confort", "Réduit", "Hors gel", "Inconnu"],
   "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
 }
 )", id, name, id, id);

@@ -160,7 +160,6 @@ bool Connect::recupererConsommationGaz() {
         size_t length = 0;
         err = this->waitingAnswer(ID_CHAUDIERE, donnees, &length);
         if(err != RADIOLIB_ERR_NONE) {
-            delay(500);
             continue;
         }
 
@@ -242,7 +241,6 @@ bool Connect::recupererVacances() {
             continue;
         }
         return true;
-        delay(500);
     } while(retry++ < 5);
 
     return false;
@@ -253,8 +251,9 @@ bool Connect::recupererPlanning() {
         return false;
     }
     
-    byte requete[] = {0x01, 0x03, 0xA1, 0x53, 0x00, 0x1C};
-    
+    byte requete[] = {0x08, 0x03, 0xA1, 0x54, 0x00, 0x15};
+    //TODO A TESTER
+
     uint8_t retry = 0;
 
     do {
@@ -273,7 +272,6 @@ bool Connect::recupererPlanning() {
             continue;
         }
         return true;
-        delay(500);
     } while(retry++ < 5);
 
     return false;
@@ -426,4 +424,51 @@ void Connect::verifierBoost() {
             }
         }
     }
+}
+
+bool Connect::envoyerConsigne(uint8_t idZone, float tempAmbiante, float tempConsigne, MODE_ZONE mode, bool confort, bool derogation) {
+    if(! this->isReady()) {
+        return false;
+    }
+    
+    byte requete[sizeof(SATELLITE_ENVOI_CONSIGNE_TRAME)] = { 0 };
+    SATELLITE_ENVOI_CONSIGNE_TRAME trame(idZone);
+    if(mode == MODE_ZONE::CONFORT) {
+        trame.mode == 0x01;
+    } else if (mode == MODE_ZONE::REDUIT) {
+        trame.mode = 0x00;
+    } else if(mode == MODE_ZONE::HORS_GEL) {
+        trame.mode = 0x10;
+    } else if(mode == MODE_ZONE::AUTO) {
+        if(derogation) {
+            trame.mode = confort ? 0x03 : 0x02;
+        } else {
+            trame.mode = confort ? 0x05 : 0x04;
+        }
+    } else {
+        return false;
+    }
+
+    memcpy(requete, &trame, sizeof(trame));
+
+    uint8_t retry = 0;
+    do {
+        delay(500);
+        this->incrementRollingCode();
+        uint8_t err = this->sendData(ID_CHAUDIERE, requete, sizeof(requete));
+        if (err != RADIOLIB_ERR_NONE) {
+            continue;
+        }
+
+        byte donnees[RADIOLIB_SX126X_MAX_PACKET_LENGTH];
+        size_t length = 0;
+        err = this->waitingAnswer(ID_CHAUDIERE, donnees, &length);
+
+        if(err != RADIOLIB_ERR_NONE) {
+            continue;
+        }
+        return true;
+    } while(retry++ < 5);
+
+    return false;
 }

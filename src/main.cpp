@@ -15,8 +15,11 @@
 #include "devices/SondeExterieure.h"
 #include "devices/Satellite.h"
 #include "DS18B20.h"
+#include "Timer.h"
 
 #include "types/Date.h"
+
+#include <TimeLib.h>
 
 Radio *radio;
 MQTT *mqtt;
@@ -26,10 +29,11 @@ Preferences preferences;
 
 unsigned long lastTxExtSonTime = 30000;        // Variable dernière transmission sonde ajout de 30 sec d'intervale pour ne pas envoyé en meme temps que le connect
 const unsigned long txExtSonInterval = 600000; // Interval de transmission en millisecondes (10 minutes)
-const unsigned long verifBoostInterval = 600000; // Interval de verification du boost en millisecondes (10 minutes)
-unsigned long lastConMsgTime = 0;
-const unsigned long conMsgInterval = 120000; // 2 minute
-unsigned long lastVerifBoostTime = 0;
+
+Timer temperatureExterieureTimer = Timer(600000); // 10 minutes
+Timer connectTimer = Timer(120000); // 2 minutes
+Timer verificationBoostTimer = Timer(600000); // 10 minutes
+Timer recuperationDateTimer = Timer(300000); // 5 minutes
 
 bool associationMode = false;
 
@@ -219,12 +223,39 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
       }
     }
   }
+  if(topic == MQTT_ASS_CON_SET) {
+    ASSOCIATION_INFOS association = Connect::associer(radio);
+    if(! association.networkId.isBroadcast()) {
+      networkId = association.networkId;
+      frisquetConnectAssociationId = association.associationId;
+
+      // Démarre l'instance de NVS
+        preferences.begin("net-conf", false);
+        preferences.putBytes("net_id", &networkId, sizeof(NetworkID));
+        preferences.putUChar("con_id", frisquetConnectAssociationId); 
+        preferences.end(); // Ferme la mémoire NVS
+    }
+    mqtt->publish(MQTT_ASS_CON, 'OFF');
+  }
   #endif
 
   #if USE_SONDE_EXTERIEURE
     if(topic == MQTT_TEMPERATURE_EXTERIEURE_SET) {
       sondeExterieure->envoyerTemperature(message.toFloat());
+    } else if(topic == MQTT_ASS_SON_SET) {
+    ASSOCIATION_INFOS association = Connect::associer(radio);
+    if(! association.networkId.isBroadcast()) {
+      networkId = association.networkId;
+      sondeExterieureAssociationId = association.associationId;
+
+      // Démarre l'instance de NVS
+        preferences.begin("net-conf", false);
+        preferences.putBytes("net_id", &networkId, sizeof(NetworkID));
+        preferences.putUChar("son_id", sondeExterieureAssociationId); 
+        preferences.end(); // Ferme la mémoire NVS
     }
+    mqtt->publish(MQTT_ASS_SON, 'OFF');
+  }
   #endif
 }
 
@@ -308,7 +339,15 @@ void onReceiveRadio() {
   radio->startReceive();
 }
 
+time_t syncDateFromConnect() {
+  #if USE_CONNECT
+    if(connect->recupererDate(&date)) {
+      setTime(date.heure, date.minute, date.seconde, date.jour, date.mois, date.annee);
+    }
+  #endif
 
+  return 0;
+}
 
 void setup() {
     Serial.begin(115200);
@@ -360,6 +399,13 @@ void setup() {
     #endif
 
     satelliteZ1 = new Satellite(radio, mqtt, ID_ZONE_1, satelliteZ1AssociationId);
+
+    temperatureExterieureTimer.start();
+    connectTimer.start(millis() + 120000);
+    verificationBoostTimer.start();
+    recuperationDateTimer.start();
+
+    syncDateFromConnect();
 }
 
 void loop() {
@@ -372,11 +418,9 @@ void loop() {
     onReceiveRadio();
   }
 
-  unsigned long currentTime = millis();
-
   #if USE_SONDE_EXTERIEURE
   //TODO Voir pour déplacer dans SondeExterieure:loop()
-  if ((currentTime - lastTxExtSonTime) >= txExtSonInterval) { // Vérifier si 10 minutes se sont écoulées depuis la dernière transmission
+  if (temperatureExterieureTimer.tick()) { // Vérifier si 10 minutes se sont écoulées depuis la dernière transmission
     DBG_PRINT(F("[] Envoi température extérieure..."));
     #if USE_DS18B20
     if(ds18b20->getTemperature(&temperatureExterieure)) {
@@ -390,14 +434,19 @@ void loop() {
           DBG_PRINTLN(F("OK"));
       }
     #endif
-
-    lastTxExtSonTime = currentTime;
   }
   #endif
 
   #if USE_CONNECT
+
+
+
+  if(recuperationDateTimer.tick()) {
+    syncDateFromConnect();
+  }
+
   //TODO Voir pour déplacer dans Connect:loop()
-  if ((currentTime - lastConMsgTime) >= conMsgInterval || !lastConMsgTime) { // Vérifier si 2 minutes se sont écoulées depuis la dernière transmission
+  if (connectTimer.tick()) { // Vérifier si 2 minutes se sont écoulées depuis la dernière transmission
     DBG_PRINT(F("[] Récupération des informations de la chaudière..."));
 
     if(connect->recupererTemperatures()) {
@@ -421,20 +470,14 @@ void loop() {
 
     if(connect->recupererConsommationGaz()) {
       DBG_PRINTLN(F("Récupérations consommation gaz OK"));
-
       // TODO Voir pour vérifier jour actuel
       mqtt->publish(MQTT_CONSO_GAZ_CHAUFFAGE, connect->getConsommationGazChauffage());
       mqtt->publish(MQTT_CONSO_GAZ_ECS, connect->getConsommationGazECS());
     }
-
-    lastConMsgTime = currentTime;
-
   }
 
-  if ((currentTime - lastVerifBoostTime) >= verifBoostInterval) { // Vérifier si 10 minutes se sont écoulées depuis la dernière vérification
+  if (verificationBoostTimer.tick()) { // Vérifier si 10 minutes se sont écoulées depuis la dernière vérification
     connect->verifierBoost();
-
-    lastVerifBoostTime = currentTime;
   }
 
   if(connect->envoiModeZ1()) {
