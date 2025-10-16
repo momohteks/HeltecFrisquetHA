@@ -9,7 +9,7 @@ bool SondeExterieure::envoyerTemperature(float temperature) {
     }
 
     TEMPERATURE_EXTERIEURE_TRAME donnees;
-    donnees.temperatureExterieure = temperature;
+    donnees.temperatureExterieure = std::max(std::min(-30.0f, temperature), 50.0f);
 
     byte requete[sizeof(TEMPERATURE_EXTERIEURE_TRAME)];
     memcpy(requete, &donnees, sizeof(TEMPERATURE_EXTERIEURE_TRAME));

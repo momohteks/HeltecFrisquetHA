@@ -46,6 +46,7 @@ Connect *connect;
 SondeExterieure *sondeExterieure;
 Satellite* satelliteZ1;
 float temperatureExterieure = 0;
+bool temperatureExterieureAvailable = false;
 
 #if USE_DS18B20
 DS18B20 *ds18b20;
@@ -235,13 +236,14 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
         preferences.putUChar("con_id", frisquetConnectAssociationId); 
         preferences.end(); // Ferme la mémoire NVS
     }
-    mqtt->publish(MQTT_ASS_CON, 'OFF');
+    mqtt->publish(MQTT_ASS_CON, "OFF");
   }
   #endif
 
   #if USE_SONDE_EXTERIEURE
     if(topic == MQTT_TEMPERATURE_EXTERIEURE_SET) {
-      sondeExterieure->envoyerTemperature(message.toFloat());
+      temperatureExterieure = message.toFloat();
+      temperatureExterieureAvailable = true;
     } else if(topic == MQTT_ASS_SON_SET) {
     ASSOCIATION_INFOS association = Connect::associer(radio);
     if(! association.networkId.isBroadcast()) {
@@ -254,7 +256,7 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
         preferences.putUChar("son_id", sondeExterieureAssociationId); 
         preferences.end(); // Ferme la mémoire NVS
     }
-    mqtt->publish(MQTT_ASS_SON, 'OFF');
+    mqtt->publish(MQTT_ASS_SON, "OFF");
   }
   #endif
 }
@@ -424,13 +426,14 @@ void loop() {
     DBG_PRINT(F("[] Envoi température extérieure..."));
     #if USE_DS18B20
     if(ds18b20->getTemperature(&temperatureExterieure)) {
+      temperatureExterieureAvailable = true;
       if(sondeExterieure->envoyerTemperature(temperatureExterieure)) {
         mqtt->publish(MQTT_TEMP_EXTERIEURE, temperatureExterieure);
         DBG_PRINTLN(F("OK"));
       }
     }
     #else
-      if(sondeExterieure->envoyerTemperature(temperatureExterieure)) {
+      if(temperatureExterieureAvailable && sondeExterieure->envoyerTemperature(temperatureExterieure)) {
           DBG_PRINTLN(F("OK"));
       }
     #endif
