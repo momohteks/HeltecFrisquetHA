@@ -33,11 +33,10 @@
 #define USE_SONDE_EXTERIEURE true   // Activation sonde extérieure (Virtuelle OU DS18B20)
 #if USE_SONDE_EXTERIEURE
     #define USE_DS18B20 true            // Option: si true, on lit le DS18B20 local comme source de T° ext.
-    #if USE_DS18B20
-        #define DS18B20_PIN GPIO_NUM_33     // Broche du bus OneWire (DS18B20)
-        #define DS18B20_OFFSET 0.0f         // Décalage de calibration si besoin (ex: +0.3°C)
-    #endif
 #endif
+#define DS18B20_PIN GPIO_NUM_33     // Broche du bus OneWire (DS18B20)
+#define DS18B20_OFFSET 0.0f         // Décalage de calibration si besoin (ex: +0.3°C)
+
 
 // Configuration ASSOCIATION ID par défaut
 #define DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID 0x00
