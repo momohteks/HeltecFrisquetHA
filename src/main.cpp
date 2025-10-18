@@ -14,7 +14,11 @@
 #include "devices/Connect.h"
 #include "devices/SondeExterieure.h"
 #include "devices/Satellite.h"
+
+#if USE_DS18B20
 #include "DS18B20.h"
+#endif
+
 #include "Timer.h"
 
 #include "types/Date.h"
@@ -167,6 +171,44 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
       zone1->setTemperatureHorsGel(message.toFloat());
       connect->envoyerZone(zone1);
     } 
+
+    #if USE_ZONE_2
+    if(topic == MQTT_TEMP_CONSIGNE_CONFORT2_SET) {
+      zone2->setTemperatureConfort(message.toFloat());
+      connect->envoyerZone(zone1);
+    } else if(topic == MQTT_TEMP_CONSIGNE_REDUIT2_SET) {
+      zone2->setTemperatureReduit(message.toFloat());
+      connect->envoyerZone(zone1);
+    } else if(topic == MQTT_TEMP_CONSIGNE_HORSGEL2_SET) {
+      zone2->setTemperatureHorsGel(message.toFloat());
+      connect->envoyerZone(zone1);
+    } else if(topic == MQTT_MODE2_SET) {
+      if(zone2->getNomMode() == message) {
+        return;
+      }
+      zone2->setMode(message.c_str());
+      connect->envoyerZone(zone2);
+    }
+    #endif
+
+    #if USE_ZONE_3
+    if(topic == MQTT_TEMP_CONSIGNE_CONFORT3_SET) {
+      zone3->setTemperatureConfort(message.toFloat());
+      connect->envoyerZone(zone1);
+    } else if(topic == MQTT_TEMP_CONSIGNE_REDUIT3_SET) {
+      zone3->setTemperatureReduit(message.toFloat());
+      connect->envoyerZone(zone1);
+    } else if(topic == MQTT_TEMP_CONSIGNE_HORSGEL3_SET) {
+      zone3->setTemperatureHorsGel(message.toFloat());
+      connect->envoyerZone(zone1);
+    } else if(topic == MQTT_MODE3_SET) {
+      if(zone2->getNomMode() == message) {
+        return;
+      }
+      zone3->setMode(message.c_str());
+      connect->envoyerZone(zone3);
+    }
+    #endif
     
     // Zone 1
     if(topic == MQTT_MODE1_SET) {
@@ -301,7 +343,7 @@ void onReceiveRadio() {
                 Zone* zone2 = connect->getZone2();
                 mqtt->publish(MQTT_TEMP_CONSIGNE_CONFORT2, zone2->getTemperatureConfort());
                 mqtt->publish(MQTT_TEMP_CONSIGNE_REDUIT2, zone2->getTemperatureReduit());
-                mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL2, zone2->getTemperatureReduit());
+                mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL2, zone2->getTemperatureHorsGel());
 
                 if(zone2->getMode() != 0) {
                   mqtt->publish(MQTT_MODE2, zone2->getNomMode().c_str());
@@ -313,7 +355,7 @@ void onReceiveRadio() {
                 Zone* zone3 = connect->getZone3();
                 mqtt->publish(MQTT_TEMP_CONSIGNE_CONFORT3, zone3->getTemperatureConfort());
                 mqtt->publish(MQTT_TEMP_CONSIGNE_REDUIT3, zone3->getTemperatureReduit());
-                mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL3, zone3->getTemperatureReduit());
+                mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL3, zone3->getTemperatureHorsGel());
 
                 if(zone3->getMode() != 0) {
                   mqtt->publish(MQTT_MODE3, zone3->getNomMode().c_str());

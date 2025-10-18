@@ -376,7 +376,7 @@ void MQTT::connecterTemperatureConsigneReduitZ1() {
   char configTopic[70];
   char configPayload[500];
   char id[] = "tempConsigneReduit1";
-  char name[] = "Temperature consigne Hors Gel Z1";
+  char name[] = "Temperature consigne réduit Z1";
 
   snprintf(configTopic, sizeof(configTopic), "homeassistant/number/frisquet/%s/config", id);
   snprintf(configPayload, sizeof(configPayload), R"(
@@ -451,7 +451,7 @@ void MQTT::connecterTemperatureConsigneReduitZ2() {
   char configTopic[70];
   char configPayload[500];
   char id[] = "tempConsigneReduit2";
-  char name[] = "Temperature consigne Hors Gel Z2";
+  char name[] = "Temperature consigne réduit Z2";
 
   snprintf(configTopic, sizeof(configTopic), "homeassistant/number/frisquet/%s/config", id);
   snprintf(configPayload, sizeof(configPayload), R"(
