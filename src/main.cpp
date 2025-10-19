@@ -188,6 +188,8 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
       }
       zone2->setMode(message.c_str());
       connect->envoyerZone(zone2);
+    } else if(topic == MQTT_MODE2) {
+      zone2->setMode(message.c_str());
     }
     #endif
 
@@ -202,11 +204,13 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
       zone3->setTemperatureHorsGel(message.toFloat());
       connect->envoyerZone(zone1);
     } else if(topic == MQTT_MODE3_SET) {
-      if(zone2->getNomMode() == message) {
+      if(zone3->getNomMode() == message) {
         return;
       }
       zone3->setMode(message.c_str());
       connect->envoyerZone(zone3);
+    } else if(topic == MQTT_MODE3) {
+      zone3->setMode(message.c_str());
     }
     #endif
     
