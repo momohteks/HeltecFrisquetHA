@@ -10,7 +10,7 @@
 
 struct ASSOCIATION_INFOS {
     NetworkID networkId = {0xFF,0xFF,0xFF,0xFF};
-    uint8_t associationId = 0x00;
+    uint8_t associationId = 0xFF;
 };
 
 class Device {
@@ -33,7 +33,7 @@ class Device {
         Radio *radio;
         MQTT *mqtt;
     private:
-        uint8_t idAssociation = 0;
+        uint8_t idAssociation = 0xFF;
         uint8_t idExpediteur = 0;
         uint8_t rollingCode = 0;
 };

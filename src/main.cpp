@@ -41,9 +41,9 @@ Timer recuperationDateTimer = Timer(300000); // 5 minutes
 
 bool associationMode = false;
 
-uint8_t sondeExterieureAssociationId = 0;
-uint8_t frisquetConnectAssociationId = 0;
-uint8_t satelliteZ1AssociationId = 0;
+uint8_t sondeExterieureAssociationId = 0xFF;
+uint8_t frisquetConnectAssociationId = 0xFF;
+uint8_t satelliteZ1AssociationId = 0xFF;
 NetworkID networkId;
 
 Connect *connect;
@@ -64,9 +64,9 @@ void initNvs() {
   preferences.begin("net-conf", false);
 
   NetworkID defaultNetworkId = DEFAULT_NETWORK_ID;
-  sondeExterieureAssociationId = (DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID == 0) ? preferences.getUChar("son_id", 0) : DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID;
-  frisquetConnectAssociationId = (DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID == 0) ? preferences.getUChar("con_id", 0) : DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID;
-  satelliteZ1AssociationId = (DEFAULT_SATELLITE_Z1_ASSOCIATION_ID == 0) ? preferences.getUChar("satz1_id", 0) : DEFAULT_SATELLITE_Z1_ASSOCIATION_ID;
+  sondeExterieureAssociationId = (DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID == 0xFF ? preferences.getUChar("son_id", 0) : DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID);
+  frisquetConnectAssociationId = (DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID == 0xFF ? preferences.getUChar("con_id", 0) : DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID);
+  satelliteZ1AssociationId = (DEFAULT_SATELLITE_Z1_ASSOCIATION_ID == 0xFF ? preferences.getUChar("satz1_id", 0) : DEFAULT_SATELLITE_Z1_ASSOCIATION_ID);
 
   if ((preferences.getBytes("net_id", &networkId, sizeof(NetworkID)) != sizeof(NetworkID) || networkId.toInt32() == 0 || networkId.isBroadcast())
    && defaultNetworkId.toInt32() != 0) {

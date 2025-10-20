@@ -202,5 +202,5 @@ ASSOCIATION_INFOS Device::associer(Radio *radio, uint8_t idAppareil) {
 }
 
 bool Device::isReady() {
-    return this->idExpediteur != 0 && this->idAssociation != 0;
+    return this->idExpediteur != 0 && this->idAssociation != 0xFF;
 }
