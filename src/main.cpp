@@ -25,6 +25,8 @@
 
 #include <TimeLib.h>
 
+#include "Logs.h"
+
 Radio *radio;
 MQTT *mqtt;
 

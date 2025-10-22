@@ -1,5 +1,6 @@
 #include "Portal.h"
 #include <Preferences.h>
+#include "Logs.h"
 
 static WebServer server(80);
 static Preferences prefs;
@@ -46,6 +47,7 @@ static void handleRoot() {
   html += "MQTT user:<input name='mqttUser' value='"+String(cfg.mqttUser)+"'><br>";
   html += "MQTT pass:<input name='mqttPass' type='password' value='"+String(cfg.mqttPass)+"'><br>";
   html += "<button type='submit'>Save</button></form>";
+  html += "<a class='btn' href='/logs'>Voir les logs</a>";
   server.send(200, "text/html", html);
 }
 
@@ -66,6 +68,82 @@ static void handleSave() {
     delay(1000);
     ESP.restart();
   }
+}
+
+// Page HTML (auto-refresh, filtrage léger, téléchargement)
+static void handleLogsPage() {
+  String html = F(
+    "<!DOCTYPE html><html><head><meta charset='utf-8'>"
+    "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+    "<title>Frisquet - Logs</title>"
+    "<style>"
+      "body{font-family:ui-monospace,Menlo,Consolas,monospace;margin:12px;}"
+      "header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}"
+      "input,select,button{padding:6px 10px}"
+      "pre{white-space:pre-wrap;background:#0b0b0b;color:#e6e6e6;padding:12px;border-radius:8px;max-height:70vh;overflow:auto}"
+      ".muted{opacity:.7}"
+    "</style></head><body>"
+    "<header>"
+      "<a href='/'>&larr; Retour</a>"
+      "<strong>Logs</strong>"
+      "<label class='muted'>Refresh "
+        "<select id='refresh'>"
+          "<option value='0'>off</option>"
+          "<option value='1000'>1s</option>"
+          "<option value='2000' selected>2s</option>"
+          "<option value='5000'>5s</option>"
+          "<option value='10000'>10s</option>"
+        "</select>"
+      "</label>"
+      "<label class='muted'>Filtre <input id='filter' placeholder='texte...' /></label>"
+      "<button id='btnReload'>Recharger</button>"
+      "<button id='btnClear'>Effacer</button>"
+      "<a id='btnDownload' href='/logs.txt' download='logs.txt'>Télécharger</a>"
+    "</header>"
+    "<pre id='log'>(chargement...)</pre>"
+    "<script>"
+    "let t=null;"
+    "const logEl=document.getElementById('log');"
+    "const sel=document.getElementById('refresh');"
+    "const filter=document.getElementById('filter');"
+    "const reload=()=>{fetch('/logs.txt?ts='+Date.now(),{cache:'no-store'})"
+      ".then(r=>r.ok?r.text():Promise.reject(r.status))"
+      ".then(txt=>{"
+        "const f=filter.value.trim().toLowerCase();"
+        "if(f){"
+          "txt=txt.split('\\n').filter(l=>l.toLowerCase().includes(f)).join('\\n');"
+        "}"
+        "logEl.textContent=txt||'(vide)';"
+        "logEl.scrollTop=logEl.scrollHeight;"
+      "}).catch(e=>{logEl.textContent='Erreur chargement logs: '+e;});};"
+    "document.getElementById('btnReload').onclick=reload;"
+    "document.getElementById('btnClear').onclick=()=>{"
+      "fetch('/logs/clear',{method:'POST'}).then(()=>reload());"
+    "};"
+    "sel.onchange=()=>{ if(t){clearInterval(t);t=null;} const v=+sel.value; if(v>0){t=setInterval(reload,v);} };"
+    "reload(); t=setInterval(reload,2000);"
+    "</script>"
+    "</body></html>"
+  );
+  server.send(200, "text/html", html);
+}
+
+// Texte brut (pour téléchargement / intégrations)
+static void handleLogsRaw() {
+  String all = logs.getAllLogs();
+  // Empêche la mise en cache côté navigateur
+  server.sendHeader("Cache-Control", "no-store, max-age=0");
+  server.send(200, "text/plain", all);
+}
+
+// Effacer les logs
+static void handleLogsClear() {
+  if (server.method() != HTTP_POST) {
+    server.send(405, "text/plain", "Method Not Allowed");
+    return;
+  }
+  logs.clear();
+  server.send(200, "text/plain", "OK");
 }
 
 void portalInit() {
@@ -93,6 +171,12 @@ void portalInit() {
 
   server.on("/", handleRoot);
   server.on("/save", handleSave);
+  
+  // --- routes logs ---
+  server.on("/logs",     HTTP_GET,  handleLogsPage);
+  server.on("/logs.txt", HTTP_GET,  handleLogsRaw);
+  server.on("/logs/clear", HTTP_POST, handleLogsClear);
+
   server.begin();
 }
 

@@ -3,12 +3,13 @@
 #define CONF_H
 
 #include <heltec.h>
+#include "Logs.h"
 
 #define DEBUG 1
 #if DEBUG
-#define DBG_PRINT(x) Serial.print(x)
-#define DBG_PRINTF(x, y) Serial.printf(x, y)
-#define DBG_PRINTLN(x) Serial.println(x)
+#define DBG_PRINT(x) logs.addLog("INFO", x)
+#define DBG_PRINTF(x, y) logs.addLogf("INFO", x, y)
+#define DBG_PRINTLN(x) logs.addLog("INFO", x)
 #else
 #define DBG_PRINT(x)
 #define DBG_PRINTLN(x)
