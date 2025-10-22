@@ -73,3 +73,30 @@ struct SATELLITE_ENVOI_CONSIGNE_TRAME {
         }
     }
 };
+
+// 81 17 2A 00 96 00 00 25 10 20 18 00 12 00 01 00 CA 00 C8 00 05 00 C6 00 C6 04 F6 00 00 00 00 00 00 00 00 04 F6 00 00 00 00 00 00 00 00
+struct INFOS_ZONES_TRAME {
+    byte question; // 0x01 question ou 0x81 réponse
+    byte code = 0x17; // Lecture + écriture
+    byte cmd1 = 0x2A;
+    TEMPERATURE16 temperatureExterieure;
+    byte cmd2[2] = {0x00, 0x00}; // Zone mémoire lecture
+    uint8_t dateheure[6];  // format reçu "YY MM DD hh mm ss"
+    byte modeChaudiere; // mode chaudière à valider
+    uint8_t jourSemaine; // format wday
+    TEMPERATURE16 temperatureAmbiante1;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C
+    TEMPERATURE16 temperatureConsigne1;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C
+    byte cmd3 = 0x00;
+    uint8_t mode1 = 0x00;                       // 0x05 auto - 0x06 confort - 0x07 reduit - 0x08 hors gel
+    byte cmd4[4] = {0x00, 0xC6, 0x00, 0xC6};
+    TEMPERATURE16 temperatureAmbiante2;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C
+    TEMPERATURE16 temperatureConsigne2;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C
+    byte cmd5 = 0x00;
+    uint8_t mode2 = 0x00;                       // 0x05 auto - 0x06 confort - 0x07 reduit - 0x08 hors gel
+    byte cmd6[4] = {0x00, 0x00, 0x00, 0x00};
+    TEMPERATURE16 temperatureAmbiante3;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C
+    TEMPERATURE16 temperatureConsigne3;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C
+    byte cmd7 = 0x00;
+    uint8_t mode3 = 0x00;                       // 0x05 auto - 0x06 confort - 0x07 reduit - 0x08 hors gel
+    byte cmd8[4] = {0x00, 0x00, 0x00, 0x00};
+};

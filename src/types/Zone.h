@@ -25,6 +25,7 @@ enum MODE_ZONE : uint8_t {
 class Zone {
     public:
         Zone();
+        Zone(uint8_t idZone);
         Zone(const ZONE_TRAME* trame);
 
         void setTemperatureConfort(float temperature);

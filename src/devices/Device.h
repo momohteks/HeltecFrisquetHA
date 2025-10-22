@@ -29,6 +29,7 @@ class Device {
         static ASSOCIATION_INFOS associer(Radio *radio, uint8_t idAppareil);
 
         void sendPayload(byte byteArr[], size_t len);
+        uint8_t getIdExpediteur();
 
         Radio *radio;
         MQTT *mqtt;

@@ -84,6 +84,7 @@ void portalInit() {
 
   WiFi.mode(WIFI_AP_STA);
   WiFi.onEvent(onWiFiEvent);
+  WiFi.setHostname("ESPFrisquet Connect");
   WiFi.setAutoReconnect(true);
   if (strlen(cfg.wifiSsid) > 0) {
     WiFi.begin(cfg.wifiSsid, cfg.wifiPass);

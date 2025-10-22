@@ -1,6 +1,9 @@
 #include "Zone.h"
 
 Zone::Zone() {}
+Zone::Zone(uint8_t idZone) {
+    this->idZone = idZone;
+}
 Zone::Zone(const ZONE_TRAME* trame) {
     this->fromBytes(trame);
 }
