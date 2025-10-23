@@ -281,8 +281,10 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
       // Démarre l'instance de NVS
         preferences.begin("net-conf", false);
         preferences.putBytes("net_id", &networkId, sizeof(NetworkID));
-        preferences.putUChar("con_id", frisquetConnectAssociationId); 
+        preferences.putUChar("con_id", frisquetConnectAssociationId);
         preferences.end(); // Ferme la mémoire NVS
+
+        ESP.restart();
     }
     mqtt->publish(MQTT_ASS_CON, "OFF");
   }
@@ -303,6 +305,8 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
         preferences.putBytes("net_id", &networkId, sizeof(NetworkID));
         preferences.putUChar("son_id", sondeExterieureAssociationId); 
         preferences.end(); // Ferme la mémoire NVS
+
+        ESP.restart();
     }
     mqtt->publish(MQTT_ASS_SON, "OFF");
   }
