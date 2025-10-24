@@ -114,6 +114,44 @@ void MQTT::connecterTemperatureConsigneZ2() {
   this->client.publish(configTopic, configPayload);
 }
 
+void MQTT::connecterTemperatureAmbianteZ3() {
+  char configTopic[60];
+  char configPayload[350];
+  char id[] = "tempAmbiante3";
+  char name[] = "Temperature ambiante Z3";
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/sensor/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/sensor/frisquet/%s/state",
+  "unit_of_measurement": "°C",
+  "device_class": "temperature",
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id);
+  this->client.publish(configTopic, configPayload);
+}
+
+void MQTT::connecterTemperatureConsigneZ3() {
+  char configTopic[60];
+  char configPayload[350];
+  char id[] = "tempConsigne3";
+  char name[] = "Temperature consigne Z3";
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/sensor/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/sensor/frisquet/%s/state",
+  "unit_of_measurement": "°C",
+  "device_class": "temperature",
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id);
+  this->client.publish(configTopic, configPayload);
+}
+
 void MQTT::connecterTemperatureExterieure() {
   char configTopic[60];
   char configPayload[350];
@@ -293,6 +331,25 @@ void MQTT::connecterModeZ2() {
   char configPayload[400];
   char id[] = "mode2";
   char name[] = "Mode Z2";
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/select/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/select/frisquet/%s/state",
+  "command_topic": "homeassistant/select/frisquet/%s/set",
+  "options": ["Auto", "Confort", "Réduit", "Hors gel", "Inconnu"],
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id, id);
+  this->client.publish(configTopic, configPayload);
+}
+
+void MQTT::connecterModeZ3() {
+  char configTopic[60];
+  char configPayload[400];
+  char id[] = "mode3";
+  char name[] = "Mode Z3";
   snprintf(configTopic, sizeof(configTopic), "homeassistant/select/frisquet/%s/config", id);
   snprintf(configPayload, sizeof(configPayload), R"(
 {
@@ -497,6 +554,81 @@ void MQTT::connecterTemperatureConsigneConfortZ2() {
   this->client.publish(configTopic, configPayload);
 }
 
+void MQTT::connecterTemperatureConsigneHorsGelZ3() {
+  char configTopic[70];
+  char configPayload[500];
+  char id[] = "tempConsigneHorsGel3";
+  char name[] = "Temperature consigne Hors Gel Z3";
+
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/number/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/number/frisquet/%s/state",
+  "command_topic": "homeassistant/number/frisquet/%s/set",
+  "min": 6,
+  "max": 30,
+  "mode": "box",
+  "step": 0.5,
+  "unit_of_measurement": "°C",
+  "device_class": "temperature",
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id, id);
+  this->client.publish(configTopic, configPayload);
+}
+
+void MQTT::connecterTemperatureConsigneReduitZ3() {
+  char configTopic[70];
+  char configPayload[500];
+  char id[] = "tempConsigneReduit3";
+  char name[] = "Temperature consigne réduit Z3";
+
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/number/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/number/frisquet/%s/state",
+  "command_topic": "homeassistant/number/frisquet/%s/set",
+  "min": 6,
+  "max": 30,
+  "mode": "box",
+  "step": 0.5,
+  "unit_of_measurement": "°C",
+  "device_class": "temperature",
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id, id);
+  this->client.publish(configTopic, configPayload);
+}
+
+void MQTT::connecterTemperatureConsigneConfortZ3() {
+  char configTopic[70];
+  char configPayload[500];
+  char id[] = "tempConsigneConfort3";
+  char name[] = "Temperature consigne Confort Z3";
+
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/number/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/number/frisquet/%s/state",
+  "command_topic": "homeassistant/number/frisquet/%s/set",
+  "min": 6,
+  "max": 30,
+  "mode": "box",
+  "step": 0.5,
+  "unit_of_measurement": "°C",
+  "device_class": "temperature",
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id, id);
+  this->client.publish(configTopic, configPayload);
+}
+
 void MQTT::connecterBoostZ1() {
   char configTopic[60];
   char configPayload[400];
@@ -540,6 +672,16 @@ void MQTT::connectTopics() {
       this->connecterTemperatureConsigneConfortZ2();
     }
 
+    if (USE_ZONE_3) {
+      this->connecterTemperatureAmbianteZ3();
+      this->connecterTemperatureConsigneZ3();
+      this->connecterModeZ3();
+
+      this->connecterTemperatureConsigneHorsGelZ3();
+      this->connecterTemperatureConsigneReduitZ3();
+      this->connecterTemperatureConsigneConfortZ3();
+    }
+
     this->connecterTemperatureExterieure();
 
     this->connecterTemperatureCDC();
@@ -565,11 +707,16 @@ void MQTT::connectTopics() {
     this->client.subscribe("homeassistant/switch/frisquet/assconnect/set");
     //this->client.subscribe("homeassistant/sensor/frisquet/tempAmbiante1/state");
     //this->client.subscribe("homeassistant/sensor/frisquet/tempExterieure/state");
-    this->client.subscribe("homeassistant/sensor/frisquet/tempConsigne1/state");
+    //this->client.subscribe("homeassistant/sensor/frisquet/tempConsigne1/state");
 
     this->client.subscribe("homeassistant/number/frisquet/tempConsigneHorsGel1/set");
     this->client.subscribe("homeassistant/number/frisquet/tempConsigneReduit1/set");
     this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort1/set");
+    
+    /*this->client.subscribe("homeassistant/select/frisquet/mode1/state");
+    this->client.subscribe("homeassistant/number/frisquet/tempConsigneHorsGel1/state");
+    this->client.subscribe("homeassistant/number/frisquet/tempConsigneReduit1/state");
+    this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort1/state");*/
 
     if(USE_ZONE_2) {
       //this->client.subscribe("homeassistant/sensor/frisquet/tempAmbiante2/state");
@@ -579,6 +726,26 @@ void MQTT::connectTopics() {
       this->client.subscribe("homeassistant/number/frisquet/tempConsigneHorsGel2/set");
       this->client.subscribe("homeassistant/number/frisquet/tempConsigneReduit2/set");
       this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort2/set");
+
+      /*this->client.subscribe("homeassistant/select/frisquet/mode2/state");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneHorsGel2/state");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneReduit2/state");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort2/state");*/
+    }
+
+    if(USE_ZONE_3) {
+      //this->client.subscribe("homeassistant/sensor/frisquet/tempAmbiante3/state");
+      //this->client.subscribe("homeassistant/sensor/frisquet/tempConsigne3/state");
+      this->client.subscribe("homeassistant/select/frisquet/mode3/set");
+
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneHorsGel3/set");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneReduit3/set");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort3/set");
+
+      /*this->client.subscribe("homeassistant/select/frisquet/mode3/state");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneHorsGel3/state");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneReduit3/state");
+      this->client.subscribe("homeassistant/number/frisquet/tempConsigneConfort3/state");*/
     }
 
     #if USE_SONDE_EXTERIEURE
@@ -595,11 +762,11 @@ void MQTT::setCallback(MQTT_CALLBACK_SIGNATURE) {
     this->client.setCallback(callback);
 }
 
-boolean MQTT::publish(const char *topic, const char *payload) {
-    return this->client.publish(topic, payload);
+boolean MQTT::publish(const char *topic, const char *payload, bool retain) {
+    return this->client.publish(topic, payload, retain);
 }
 
-boolean MQTT::publish(const char *topic, float value) {
+boolean MQTT::publish(const char *topic, float value, bool retain) {
   char payload[10];
   snprintf(payload, sizeof(payload), "%.2f", value);
   return this->publish(topic, payload);

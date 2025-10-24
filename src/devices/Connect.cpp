@@ -1,30 +1,83 @@
 #include "Connect.h"
+#include <Preferences.h>
 
-Connect::Connect(Radio *radio, MQTT *mqtt, uint8_t idAssociation) :  Device(radio, mqtt, ID_FRISQUET_CONNECT, idAssociation) {}
+static Preferences prefs;
 
+Connect::Connect(Radio *radio, MQTT *mqtt, uint8_t idAssociation) :  Device(radio, mqtt, ID_FRISQUET_CONNECT, idAssociation) {
+    initConfig();
+}
+
+void Connect::initConfig() {
+    prefs.begin("connectData", true);
+    if (prefs.isKey("zone1")) {
+        prefs.getBytes("zone1", &this->zone1, sizeof(this->zone1));
+
+        mqtt->publish(MQTT_TEMP_CONSIGNE_CONFORT1, this->zone1.getTemperatureConfort(), true);
+        mqtt->publish(MQTT_TEMP_CONSIGNE_REDUIT1, this->zone1.getTemperatureReduit(), true);
+        mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL1, this->zone1.getTemperatureHorsGel(), true);
+        mqtt->publish(MQTT_MODE1, this->zone1.getNomMode().c_str(), true);
+    }
+    if (prefs.isKey("zone2")) {
+        prefs.getBytes("zone2", &this->zone2, sizeof(this->zone2));
+        
+        mqtt->publish(MQTT_TEMP_CONSIGNE_CONFORT2, this->zone2.getTemperatureConfort(), true);
+        mqtt->publish(MQTT_TEMP_CONSIGNE_REDUIT2, this->zone2.getTemperatureReduit(), true);
+        mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL2, this->zone2.getTemperatureHorsGel(), true);
+        mqtt->publish(MQTT_MODE2, this->zone2.getNomMode().c_str(), true);
+    }
+    if (prefs.isKey("zone3")) {
+        prefs.getBytes("zone3", &this->zone3, sizeof(this->zone3));
+        
+        mqtt->publish(MQTT_TEMP_CONSIGNE_CONFORT3, this->zone3.getTemperatureConfort(), true);
+        mqtt->publish(MQTT_TEMP_CONSIGNE_REDUIT3, this->zone3.getTemperatureReduit(), true);
+        mqtt->publish(MQTT_TEMP_CONSIGNE_HORSGEL3, this->zone3.getTemperatureHorsGel(), true);
+        mqtt->publish(MQTT_MODE3, this->zone3.getNomMode().c_str(), true);
+    }
+    prefs.end();
+}
+
+void Connect::saveConfig() {
+    prefs.begin("connectData", false);
+    prefs.putBytes("zone1", &this->zone1, sizeof(this->zone1));
+    prefs.putBytes("zone2", &this->zone2, sizeof(this->zone2));
+    prefs.putBytes("zone3", &this->zone3, sizeof(this->zone3));
+    prefs.end();
+}
 
 bool Connect::envoyerZone(Zone *zone) {
     if(! this->isReady()) {
         return false;
     }
     
-    if(this->zone1.getMode() == MODE_ZONE::INCONNU) { // Si aucun mode encore récupéré (initialisation)
+    DBG_PRINTLN("Tentative envoi zone...");
+
+    if( zone->getMode() == MODE_ZONE::INCONNU ||
+        zone->getTemperatureConfort() == NAN ||
+        zone->getTemperatureReduit() == NAN || 
+        zone->getTemperatureHorsGel() == NAN) { // Si aucun mode encore récupéré (initialisation)
+            DBG_PRINTLN("Annulation envoi (pas de donnnées)");
         return false;
     }
 
     byte requete[sizeof(ZONE_TRAME)];
     ZONE_TRAME trame;
+    
+    // Envoi sans planning
+    //trame.cmd2[3] = 0x02;
+    //trame.length = 4;
+
     zone->toBytes(&trame);
     memcpy(requete, &trame, sizeof(ZONE_TRAME));
+
 
     uint8_t retry = 0;
 
     if(zone->getIdZone() == ID_ZONE_1) {
-        this->_envoiModeZ1 = true;
+        this->_envoiModeZ1.start();
     } else if(zone->getIdZone() == ID_ZONE_2) {
-        this->_envoiModeZ2 = true;
+        this->_envoiModeZ2.start();
     } if(zone->getIdZone() == ID_ZONE_3) {
-        this->_envoiModeZ3 = true;
+        this->_envoiModeZ3.start();
     }
 
     do {
@@ -62,16 +115,18 @@ bool Connect::envoyerZone(Zone *zone) {
                 continue;
             } else if( length >= 4 &&
                 donnees[0] == ID_FRISQUET_CONNECT &&
-                donnees[1] == ID_CHAUDIERE) {
+                donnees[1] == ID_CHAUDIERE &&
+                donnees[4] == (zone->getIdZone()|0x80)) {
                     
                 if(zone->getIdZone() == ID_ZONE_1) {
-                    this->_envoiModeZ1 = false;
+                    this->_envoiModeZ1.stop();
                 } else if(zone->getIdZone() == ID_ZONE_2) {
-                    this->_envoiModeZ2 = false;
+                    this->_envoiModeZ2.stop();
                 } if(zone->getIdZone() == ID_ZONE_3) {
-                    this->_envoiModeZ3 = false;
+                    this->_envoiModeZ3.stop();
                 }
                 
+                this->saveConfig();
                 return true;
             }
 
@@ -251,9 +306,9 @@ bool Connect::recupererPlanning() {
         return false;
     }
     
-    byte requete[] = {0x08, 0x03, 0xA1, 0x54, 0x00, 0x15};
-    //TODO A TESTER
+    byte requete[] = {0x08, 0x17, 0xA1, 0x54, 0x00, 0x15, 0xA1, 0x54, 0x00, 0x01, 0x02, 0x00, 0x00};
 
+    //TODO A TESTER
     uint8_t retry = 0;
 
     do {
@@ -272,7 +327,7 @@ bool Connect::recupererPlanning() {
             continue;
         }
         return true;
-    } while(retry++ < 5);
+    } while(retry++ < 10);
 
     return false;
 }
@@ -309,17 +364,31 @@ bool Connect::onReceive(byte donnees[], size_t length) {
     }
 
     if (length == 59) {
-        if(donnees[1] == 0x17) { // Récupération zone
-            DBG_PRINTLN("Récupération Zone"); 
-            if(donnees[0] == ID_ZONE_1 && !this->envoiModeZ1()) {
+        if( donnees[1] == 0x17  // Code lecture + écriture
+            && donnees[2] == 0xA1 && donnees[3] == 0x54 && donnees[4] == 0x00 && donnees[5] == 0x15 // Zone mémoire lecture + longueur
+            && donnees[6] == 0xA1 && donnees[7] == 0x54 && donnees[8] == 0x00 && donnees[9] == 0x18 // Zone mémoire écriture + longueur
+        ) { // Récupération infos zone
+            if(donnees[0] == ID_ZONE_1 && !this->_envoiModeZ1.isStarted()) {
+                DBG_PRINTLN("Récupération Zone 1"); 
                 zone1.fromBytes((ZONE_TRAME*)donnees);
-            } else if(donnees[0] == ID_ZONE_2 && !this->envoiModeZ2()) {
+            } else if(donnees[0] == ID_ZONE_2 && !this->_envoiModeZ2.isStarted()) {
+                DBG_PRINTLN("Récupération Zone 2"); 
                 zone2.fromBytes((ZONE_TRAME*)donnees);
-            } else if(donnees[0] == ID_ZONE_3 && !this->envoiModeZ3()) {
+            } else if(donnees[0] == ID_ZONE_3 && !this->_envoiModeZ3.isStarted()) {
+                DBG_PRINTLN("Récupération Zone 3"); 
                 zone3.fromBytes((ZONE_TRAME*)donnees);
+            } else {
+                DBG_PRINTLN("Erreur Récupération Zone"); 
+                return false;
             }
 
-            this->sendData(ID_CHAUDIERE, donnees, length);
+            byte confirmation[length - 14];
+            confirmation[0] = donnees[0]|0x80;
+            confirmation[1] = 0x17;
+            confirmation[2] = 0x2A;
+            memcpy(&confirmation[3], &donnees[11], sizeof(confirmation));
+            this->sendData(ID_CHAUDIERE, confirmation, sizeof(confirmation));
+            this->saveConfig();
             return true;
         }
     }
@@ -327,15 +396,15 @@ bool Connect::onReceive(byte donnees[], size_t length) {
     return false;
 }
 
-bool Connect::envoiModeZ1() {
+Timer Connect::envoiModeZ1() {
     return this->_envoiModeZ1;
 }
 
-bool Connect::envoiModeZ2() {
+Timer Connect::envoiModeZ2() {
     return this->_envoiModeZ2;
 }
 
-bool Connect::envoiModeZ3() {
+Timer Connect::envoiModeZ3() {
     return this->_envoiModeZ3;
 }
 

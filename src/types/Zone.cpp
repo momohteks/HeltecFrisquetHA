@@ -50,16 +50,25 @@ void Zone::toBytes(ZONE_TRAME* trame) {
     memcpy(trame->dimanche, this->dimanche, sizeof(this->dimanche));
 }
 
-void Zone::setTemperatureConfort(float temperature) {
+void Zone::setTemperatureConfort(float temperature, bool force) {
     float temperatureAdapte = std::min(30.0f, std::max(this->temperatureReduit, temperature));
+    if(force) {
+        temperatureAdapte = std::max(5.0f, std::min(30.0f, temperature));
+    }
     this->temperatureConfort = temperatureAdapte;
 }
-void Zone::setTemperatureReduit(float temperature) {
+void Zone::setTemperatureReduit(float temperature, bool force) {
     float temperatureAdapte = std::min(this->temperatureConfort, std::max(this->temperatureHorsGel, temperature));
+    if(force) {
+        temperatureAdapte = std::max(5.0f, std::min(30.0f, temperature));
+    }
     this->temperatureReduit = temperatureAdapte;
 }
-void Zone::setTemperatureHorsGel(float temperature) {
+void Zone::setTemperatureHorsGel(float temperature, bool force) {
     float temperatureAdapte = std::min(this->temperatureReduit, std::max(5.0f, temperature));
+    if(force) {
+        temperatureAdapte = std::max(5.0f, std::min(30.0f, temperature));
+    }
     this->temperatureHorsGel = temperatureAdapte;
 }
 
@@ -80,16 +89,16 @@ MODE_ZONE Zone::getMode() {
 void Zone::setMode(MODE_ZONE mode) {
     this->mode = mode;
 }
-void Zone::setMode(const char* mode) {
-    if(mode == "Auto") {
-      this->setMode(MODE_ZONE::AUTO);
-    } else if(mode == "Réduit") {
-      this->setMode(MODE_ZONE::REDUIT);
-    } else if(mode == "Hors Gel") {
-      this->setMode(MODE_ZONE::HORS_GEL);
-    } else if(mode == "Confort") {
-      this->setMode(MODE_ZONE::CONFORT);
-    }
+void Zone::setMode(const String& mode) {
+    if (mode.equalsIgnoreCase("Auto")) {
+    this->setMode(MODE_ZONE::AUTO);
+  } else if (mode.equalsIgnoreCase("Réduit")) {
+    this->setMode(MODE_ZONE::REDUIT);
+  } else if (mode.equalsIgnoreCase("Hors gel")) {
+    this->setMode(MODE_ZONE::HORS_GEL);
+  } else if (mode.equalsIgnoreCase("Confort")) {
+    this->setMode(MODE_ZONE::CONFORT);
+  }
 }
 
 String Zone::getNomMode() {
