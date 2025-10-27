@@ -63,8 +63,8 @@ bool Connect::envoyerZone(Zone *zone) {
     ZONE_TRAME trame;
     
     // Envoi sans planning
-    //trame.cmd2[3] = 0x02;
-    //trame.length = 4;
+    trame.cmd2[3] = 0x03;
+    trame.length = 6;
 
     zone->toBytes(&trame);
     memcpy(requete, &trame, sizeof(ZONE_TRAME));
@@ -83,7 +83,7 @@ bool Connect::envoyerZone(Zone *zone) {
     do {
         delay(100);
         this->incrementRollingCode();
-        int16_t err = this->sendData(ID_CHAUDIERE, requete, sizeof(requete));
+        int16_t err = this->sendData(ID_CHAUDIERE, requete, (sizeof(requete) - 48) + 6 );
         if(err != RADIOLIB_ERR_NONE) {
             continue;
         }

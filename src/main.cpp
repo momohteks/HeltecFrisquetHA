@@ -37,7 +37,7 @@ unsigned long lastTxExtSonTime = 30000;        // Variable dernière transmissio
 const unsigned long txExtSonInterval = 600000; // Interval de transmission en millisecondes (10 minutes)
 
 Timer temperatureExterieureTimer = Timer(600000); // 10 minutes
-Timer connectTimer = Timer(120000); // 2 minutes
+Timer connectTimer = Timer(600000); // 10 minutes (aucun intéret de mettre moins, mise à jour toutes les 10 minutes dans les infos)
 Timer verificationBoostTimer = Timer(600000); // 10 minutes
 Timer recuperationDateTimer = Timer(300000); // 5 minutes
 
@@ -467,8 +467,8 @@ void setup() {
 
     satelliteZ1 = new Satellite(radio, mqtt, ID_ZONE_1, satelliteZ1AssociationId);
 
-    temperatureExterieureTimer.start();
-    connectTimer.start(millis() + 120000);
+    temperatureExterieureTimer.start(true, 30000); // Décalage de 30 secondes
+    connectTimer.start(true);
     verificationBoostTimer.start();
     recuperationDateTimer.start();
 

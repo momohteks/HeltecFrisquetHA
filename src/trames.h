@@ -5,7 +5,7 @@
 struct ZONE_TRAME {
     byte idZone = 0x00;
     byte code = 0x17; // Lecture + écriture
-    byte cmd1[4] = {0xA1, 0x54, 0x00, 0x18}; // Zone mémoire lecture (lecture sur 0x0015 WORD sur à partir de 0xA154)
+    byte cmd1[4] = {0xA1, 0x54, 0x00, 0x18}; // Zone mémoire lecture (lecture sur 0x0018 WORD sur à partir de 0xA154)
     byte cmd2[4] = {0xA1, 0x54, 0x00, 0x18}; // Zone mémoire écriture (écriture sur 0x0018 WORD sur à partir de 0xA154)
     uint8_t length = 0x30; // Longueur des données à écrire
     TEMPERATURE8 temperatureConfort;    // Début 5°C -> 0 = 50 = 5°C - MAX 30°C

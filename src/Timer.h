@@ -6,12 +6,13 @@ class Timer {
 public:
     explicit Timer(uint32_t interval) : _interval(interval) {}
 
-    void start() { start(millis()); }
-    void start(uint32_t startTick)
-    {
-        _lastTick = startTick;
+    void start(bool firstTick = false, uint32_t deferFirst = 0) {
+        _firstTick = firstTick;
+        _deferFirst = deferFirst;
+        _lastTick = millis();
         _started = true;
     }
+
     void stop()
     {
         _started = false;
@@ -26,13 +27,13 @@ public:
         if (!_started || _interval == 0)
             return false;
         uint32_t now = millis();
-        if ((uint32_t)(now - _lastTick) >= _interval)
-        {
+        if ((uint32_t)(now - _lastTick) >= _interval || (_firstTick && (uint32_t)(now - _lastTick) >= _deferFirst )) {
             // éviter la dérive : avancer par pas d'intervalle
             //_lastTick += _interval;
 
             // Si vraiment trop de retard (ex: sleep long) on peut aussi recoller à now :
              _lastTick = now;
+             _firstTick = false;
 
             return true;
         }
@@ -64,5 +65,7 @@ public:
 private:
     uint32_t _interval = 0;
     uint32_t _lastTick = 0;
+    uint32_t _deferFirst = 0;
+    bool _firstTick = false;
     bool _started = false;
 };
