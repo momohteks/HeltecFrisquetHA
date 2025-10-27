@@ -8,6 +8,7 @@
 #include "../types/Temperature.h"
 #include "../types/ConsommationGaz.h"
 #include "../trames.h"
+#include "../Timer.h"
 
 class Connect: public Device {
     public:
@@ -20,6 +21,7 @@ class Connect: public Device {
         bool recupererDate(Date *date);
         bool recupererVacances();
         bool recupererPlanning();
+        bool envoyerConsigne(uint8_t idZone, float tempAmbiante, float tempConsigne, MODE_ZONE mode, bool confort = false, bool derogation = false);
 
         Zone* getZone1();
         Zone* getZone2();
@@ -46,12 +48,15 @@ class Connect: public Device {
 
         float getTemperatureExterieure();
 
-        // Association
-        ASSOCIATION_INFOS associer(Radio *radio);
+        void initConfig();
+        void saveConfig();
 
-        bool envoiModeZ1();
-        bool envoiModeZ2();
-        bool envoiModeZ3();
+        // Association
+        static ASSOCIATION_INFOS associer(Radio *radio);
+
+        Timer envoiModeZ1();
+        Timer envoiModeZ2();
+        Timer envoiModeZ3();
 
         void verifierBoost();
         bool activerBoost(Zone* zone);
@@ -62,23 +67,23 @@ class Connect: public Device {
         Zone zone2;
         Zone zone3;
 
-        float temperatureECS;
-        float temperatureCDC;
-        float temperatureDepartZ1;
-        float temperatureDepartZ2;
-        float temperatureDepartZ3;
-        float temperatureAmbianteZ1;
-        float temperatureAmbianteZ2;
-        float temperatureAmbianteZ3;
-        float temperatureConsigneZ1;
-        float temperatureConsigneZ2;
-        float temperatureConsigneZ3;
-        float temperatureExterieure;
+        float temperatureECS = NAN;
+        float temperatureCDC = NAN;
+        float temperatureDepartZ1 = NAN;
+        float temperatureDepartZ2 = NAN;
+        float temperatureDepartZ3 = NAN;
+        float temperatureAmbianteZ1 = NAN;
+        float temperatureAmbianteZ2 = NAN;
+        float temperatureAmbianteZ3 = NAN;
+        float temperatureConsigneZ1 = NAN;
+        float temperatureConsigneZ2 = NAN;
+        float temperatureConsigneZ3 = NAN;
+        float temperatureExterieure = NAN;
         
-        float consommationGazECS = 0;
-        float consommationGazChauffage = 0;
+        float consommationGazECS = NAN;
+        float consommationGazChauffage = NAN;
         
-        bool _envoiModeZ1 = false;
-        bool _envoiModeZ2 = false;
-        bool _envoiModeZ3 = false;
+        Timer _envoiModeZ1 = Timer(15000);
+        Timer _envoiModeZ2 = Timer(15000);
+        Timer _envoiModeZ3 = Timer(15000);
 };

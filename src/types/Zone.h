@@ -25,11 +25,12 @@ enum MODE_ZONE : uint8_t {
 class Zone {
     public:
         Zone();
+        Zone(uint8_t idZone);
         Zone(const ZONE_TRAME* trame);
 
-        void setTemperatureConfort(float temperature);
-        void setTemperatureReduit(float temperature);
-        void setTemperatureHorsGel(float temperature);
+        void setTemperatureConfort(float temperature, bool force = false);
+        void setTemperatureReduit(float temperature, bool force = false);
+        void setTemperatureHorsGel(float temperature, bool force = false);
 
         float getTemperatureConfort();
         float getTemperatureReduit();
@@ -44,7 +45,7 @@ class Zone {
 
         MODE_ZONE getMode();
         void setMode(MODE_ZONE mode);
-        void setMode(const char* mode);
+        void setMode(const String& mode);
 
         String getNomMode();
 
@@ -53,9 +54,9 @@ class Zone {
 
     private:
         uint8_t idZone = 0x00;
-        float temperatureConfort;                       // Début 5°C -> max 30°C
-        float temperatureReduit;                        // Début 5°C -> max 30°C
-        float temperatureHorsGel;                       // Début 5°C -> max 30°C
+        float temperatureConfort = NAN;                       // Début 5°C -> max 30°C
+        float temperatureReduit = NAN;                        // Début 5°C -> max 30°C
+        float temperatureHorsGel = NAN;                       // Début 5°C -> max 30°C
         MODE_ZONE mode = MODE_ZONE::INCONNU;            // 0x05 auto - 0x06 confort - 0x07 reduit - 0x08 hors gel
         byte modeOptions = 0x05;
         /*

@@ -3,12 +3,13 @@
 #define CONF_H
 
 #include <heltec.h>
+#include "Logs.h"
 
 #define DEBUG 1
 #if DEBUG
-#define DBG_PRINT(x) Serial.print(x)
-#define DBG_PRINTF(x, y) Serial.printf(x, y)
-#define DBG_PRINTLN(x) Serial.println(x)
+#define DBG_PRINT(x) logs.addLog("INFO", x)
+#define DBG_PRINTF(x, y) logs.addLogf("INFO", x, y)
+#define DBG_PRINTLN(x) logs.addLog("INFO", x)
 #else
 #define DBG_PRINT(x)
 #define DBG_PRINTLN(x)
@@ -33,16 +34,15 @@
 #define USE_SONDE_EXTERIEURE true   // Activation sonde extérieure (Virtuelle OU DS18B20)
 #if USE_SONDE_EXTERIEURE
     #define USE_DS18B20 true            // Option: si true, on lit le DS18B20 local comme source de T° ext.
-    #if USE_DS18B20
-        #define DS18B20_PIN GPIO_NUM_33     // Broche du bus OneWire (DS18B20)
-        #define DS18B20_OFFSET 0.0f         // Décalage de calibration si besoin (ex: +0.3°C)
-    #endif
 #endif
+#define DS18B20_PIN GPIO_NUM_33     // Broche du bus OneWire (DS18B20)
+#define DS18B20_OFFSET 0.0f         // Décalage de calibration si besoin (ex: +0.3°C)
+
 
 // Configuration ASSOCIATION ID par défaut
-#define DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID 0x00
-#define DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID 0x00
-#define DEFAULT_SATELLITE_Z1_ASSOCIATION_ID 0x00
+#define DEFAULT_FRISQUET_CONNECT_ASSOCIATION_ID 0xFF
+#define DEFAULT_SONDE_EXTERIEURE_ASSOCIATION_ID 0xFF
+#define DEFAULT_SATELLITE_Z1_ASSOCIATION_ID 0xFF
 #define DEFAULT_NETWORK_ID {0x05, 0xDB, 0x46, 0x64}     // par défaut : {0xFF, 0xFF, 0xFF, 0xFF}
 
 #endif // CONFIG_H

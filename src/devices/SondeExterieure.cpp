@@ -9,14 +9,15 @@ bool SondeExterieure::envoyerTemperature(float temperature) {
     }
 
     TEMPERATURE_EXTERIEURE_TRAME donnees;
-    donnees.temperatureExterieure = temperature;
+    donnees.temperatureExterieure = std::min(std::max(-30.0f, temperature), 50.0f);
 
     byte requete[sizeof(TEMPERATURE_EXTERIEURE_TRAME)];
     memcpy(requete, &donnees, sizeof(TEMPERATURE_EXTERIEURE_TRAME));
     
     uint8_t retry = 0;
     do {
-        Serial.println("Envoi température");
+        Serial.print("Envoi température: ");
+        Serial.println(temperature);
         this->incrementRollingCode();
         int16_t err = this->sendData(ID_CHAUDIERE, requete, sizeof(requete));
         if(err != RADIOLIB_ERR_NONE) {

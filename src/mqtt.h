@@ -72,8 +72,8 @@ class MQTT {
         MQTT();
         void init();
         void setCallback(MQTT_CALLBACK_SIGNATURE);
-        boolean publish(const char *topic, const char *payload);
-        boolean publish(const char *topic, float value);
+        boolean publish(const char *topic, const char *payload, bool retain = false);
+        boolean publish(const char *topic, float value, bool retain = false);
         boolean loop();
 
         boolean connected();
@@ -99,6 +99,13 @@ class MQTT {
         void connecterTemperatureConsigneHorsGelZ2();
         void connecterTemperatureConsigneReduitZ2();
         void connecterTemperatureConsigneConfortZ2();
+
+        void connecterModeZ3();
+        void connecterTemperatureAmbianteZ3();
+        void connecterTemperatureConsigneZ3();
+        void connecterTemperatureConsigneHorsGelZ3();
+        void connecterTemperatureConsigneReduitZ3();
+        void connecterTemperatureConsigneConfortZ3();
 
 
         void connecterTemperatureExterieure();
