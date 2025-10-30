@@ -317,7 +317,7 @@ void onReceiveMQTT(String topic, byte *payload, unsigned int length) {
       temperatureExterieure = message.toFloat();
       temperatureExterieureAvailable = true;
     } else if(topic == MQTT_ASS_SON_SET) {
-    ASSOCIATION_INFOS association = Connect::associer(radio);
+    ASSOCIATION_INFOS association = SondeExterieure::associer(radio);
     if(! association.networkId.isBroadcast()) {
       networkId = association.networkId;
       sondeExterieureAssociationId = association.associationId;
