@@ -12,5 +12,5 @@ class SondeExterieure: public Device {
 
         bool envoyerTemperature(float temperature);
 
-        ASSOCIATION_INFOS associer(Radio *radio);
+        static ASSOCIATION_INFOS associer(Radio *radio);
 };
