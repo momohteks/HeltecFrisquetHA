@@ -111,6 +111,7 @@ class MQTT {
         void connecterTemperatureExterieure();
         void connecterTemperatureCDC();
         void connecterTemperatureDepartZ1();
+        void connecterTemperatureDepartZ2();
         void connecterTemperatureECS();
 
         void connecterAssociationSondeExterieure();
