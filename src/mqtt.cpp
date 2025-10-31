@@ -209,6 +209,25 @@ void MQTT::connecterTemperatureDepartZ1() {
   this->client.publish(configTopic, configPayload);
 }
 
+void MQTT::connecterTemperatureDepartZ2() {
+  char configTopic[60];
+  char configPayload[350];
+  char id[] = "tempDepart2";
+  char name[] = "Temperature depart Z2";
+  snprintf(configTopic, sizeof(configTopic), "homeassistant/sensor/frisquet/%s/config", id);
+  snprintf(configPayload, sizeof(configPayload), R"(
+{
+  "uniq_id": "frisquet_%s",
+  "name": "%s",
+  "state_topic": "homeassistant/sensor/frisquet/%s/state",
+  "unit_of_measurement": "°C",
+  "device_class": "temperature",
+  "device":{"ids":["Frisquet_MQTT"],"mf":"HA Community","name":"Frisquet MQTT","mdl":"ESP32 Heltec"}
+}
+)", id, name, id);
+  this->client.publish(configTopic, configPayload);
+}
+
 void MQTT::connecterTemperatureECS() {
   char configTopic[60];
   char configPayload[350];
@@ -686,6 +705,7 @@ void MQTT::connectTopics() {
 
     this->connecterTemperatureCDC();
     this->connecterTemperatureDepartZ1();
+    this->connecterTemperatureDepartZ2();
 
     this->connecterAssociationSondeExterieure();
     this->connecterAssociationConnect();
