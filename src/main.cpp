@@ -445,6 +445,8 @@ void setup() {
     });
     
     DBG_PRINTLN("NetworkID : " + byteArrayToHexString(networkId.bytes, 4));
+    DBG_PRINTLN("Connect Association ID : " + byteArrayToHexString(&frisquetConnectAssociationId, 1));
+    DBG_PRINTLN("SondeExt Association ID : " + byteArrayToHexString(&sondeExterieureAssociationId, 1));
     DBG_PRINT(F("[SX1262] Début de l'écoute radio... "));
     if(radio->startReceive() != RADIOLIB_ERR_NONE) {
         DBG_PRINT(F("Erreur lors de l'écoute."));
